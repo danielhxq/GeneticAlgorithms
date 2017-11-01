@@ -1,22 +1,45 @@
-import unittest
 import datetime
+import unittest
+
 import Genetic
 
 
 def get_fitness(genes):
     fitness = 1
+    gap = 0
     for i in range(1, len(genes)):
         if genes[i] > genes[i - 1]:
             fitness += 1
-    return fitness
+        else:
+            gap += genes[i - 1] - genes[i]
+    return Fitness(fitness, gap)
 
 
 def display(candidate, startTime):
     timeDiff = datetime.datetime.now() - startTime
     print("{0}\t=> {1}\t{2}".format(', '.join(map(str, candidate.Genes)),
-          candidate.Fitness,
-          str(timeDiff)))
+                                    candidate.Fitness,
+                                    str(timeDiff)))
 
+
+
+
+
+class Fitness:
+    NumbersInSequenceCount = None
+    TotalGap = None
+
+    def __init__(self, numbersInSequenceCount, totalGap):
+        self.NumbersInSequenceCount = numbersInSequenceCount
+        self.TotalGap = totalGap
+
+    def __gt__(self, other):
+        if self.NumbersInSequenceCount != other.NumbersInSequenceCount:
+            return self.NumbersInSequenceCount > other.NumbersInSequenceCount
+        return self.TotalGap < other.TotalGap
+
+    def __str__(self):
+        return "{0} Sequential, {1} Total Gap".format(self.NumbersInSequenceCount, self.TotalGap)
 
 
 class SortedNumbersTests(unittest.TestCase):
@@ -33,16 +56,8 @@ class SortedNumbersTests(unittest.TestCase):
         def fnGetFitness(genes):
             return get_fitness(genes)
 
-        optimalFitness = totalNumbers
+        optimalFitness = Fitness(totalNumbers, 0)
         best = Genetic.get_best(fnGetFitness, totalNumbers, optimalFitness, geneset, fnDisplay)
         self.assertTrue(not optimalFitness > best.Fitness)
 
-class Fitness:
-    NumbersInSequenceCount = None
-    TotalGap = None
-
-    def __int__(self, numbersInSequenceCount, totalGap):
-        self.NumbersInSequenceCount = numbersInSequenceCount
-        self.TotalGap = totalGap
-
-    def __gt__(self, other):
+    if __name__ == '__main__': unittest.main()
